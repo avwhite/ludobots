@@ -4,14 +4,6 @@ import random
 from math import pi, cos, sin
 from itertools import product
 
-num_neurons=10
-time_steps=50
-
-neurons = np.zeros((time_steps,num_neurons))
-for i in range(neurons.shape[1]):
-    neurons[0,i] = random.random()
-
-synapses = np.vectorize(lambda x: x*2 -1)(np.random.rand(num_neurons,num_neurons))
 
 def draw_ann(ax, synapses):
     num_neurons = synapses.shape[0]
@@ -22,7 +14,6 @@ def draw_ann(ax, synapses):
         neuron_positions[0,i] = sin(angle)
         neuron_positions[1,i] = cos(angle)
         angle += angle_update
-
 
     for (i,j) in product(range(num_neurons),repeat=2):
         (x1,y1) = neuron_positions[:,i]
@@ -39,7 +30,36 @@ def draw_ann(ax, synapses):
         markerfacecolor=[1,1,1],
         markersize=18)
 
-fig = plt.figure()
-ax1 = fig.add_subplot(1,1,1)
-draw_ann(ax1, synapses)
-fig.savefig("out02.png")
+def simulate_neurons(neurons, synapses):
+    time_steps, num_neurons = neurons.shape
+    for t in range(1, time_steps):
+        old_n_vals = neurons[t-1,:]
+        for n in range(num_neurons):
+            weights = synapses[n,:]
+            temp = np.sum(old_n_vals * weights)
+            if temp > 1:
+                new_val = 1
+            elif temp < -1:
+                new_val = -1
+            else:
+                new_val = temp
+            neurons[t,n] = new_val
+
+fig = plt.figure(figsize=(12,36))
+for a in range(5):
+    neurons = np.zeros((50,10))
+    for i in range(neurons.shape[1]):
+        neurons[0,i] = random.random()
+
+    synapses = np.vectorize(lambda x: x*2 -1)(np.random.rand(10,10))
+
+    simulate_neurons(neurons, synapses)
+
+    ax1 = fig.add_subplot(5,2,a*2+1)
+    draw_ann(ax1, synapses)
+
+    ax2 = fig.add_subplot(5,2,a*2+2)
+    ax2.set_ylabel("Time step")
+    ax2.set_xlabel("Neuron")
+    ax2.imshow(neurons, aspect='auto', cmap=plt.cm.gray, interpolation='nearest')
+    fig.savefig("out02.png", bbox_inches='tight')
