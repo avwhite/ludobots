@@ -39,8 +39,8 @@ def simulate_neurons(neurons, synapses):
             temp = np.sum(old_n_vals * weights)
             if temp > 1:
                 new_val = 1
-            elif temp < -1:
-                new_val = -1
+            elif temp < 0:
+                new_val = 0
             else:
                 new_val = temp
             neurons[t,n] = new_val
